@@ -11,10 +11,8 @@ import os
 
 os.chdir("C:/Users/YoeriVosTEYLER/TEYLER consultancy/TEYLER projects - F. Data Solutions/98 Scripts/Teyler-AM-LVO-Model")
 filename = "20220927 Meting RWS/WNN verhardingsinspectie 2022.geojson"
-
 schade_dataset = gpd.read_file(filename, driver="geojson")
 
-bool_alle_schade_aansluitend = True
 
 #alle kolommen die niet van toepassing zijn weggooien
 #uuid kolom staat er 2 x in
@@ -37,8 +35,7 @@ schade_dataset_copy = schade_dataset.copy()
 #idee: of filteren op basis van locatie binnen 200m van center punt 100m deel
 
 
-
-
+#check if geometry is valid and try to fix it
 valid_of_niet = schade_dataset.geometry.is_valid
 valid_of_niet = valid_of_niet[valid_of_niet == False]
 
@@ -60,16 +57,20 @@ pbar = tqdm(desc= 'Data clean', total = length_dataset )
 n=0
 
 for index, item in schade_dataset.iterrows():
+     
      pbar.update(1)
+     #update n om iedere x iteraties op te slaan
      n += 1
-     uuid_touch_list = []
-
 
      for index_copy, item in schade_dataset_copy.iterrows():
+          #als wegvak aan een ander wegvak grenst met schade (inclusief diagonalen)
           if(schade_dataset.loc[index, 'geometry'].touches(schade_dataset_copy.loc[index_copy, 'geometry'])):
+               #moet niet zichzelf als buur toevoegen
                if(schade_dataset.loc[index, 'uuid'] != schade_dataset.loc[index_copy, 'uuid'] ):
+                    #moet in string met spaties geplaatst worden omdat een list niet door fiona kan worden opgeslagen in een cell
                     schade_dataset.loc[index, 'neighbour_damage_uuids'] = schade_dataset.loc[index_copy, 'neighbour_damage_uuids'] + " " + schade_dataset_copy.loc[index_copy, 'uuid']
 
+     #sla iedere x iteraties een versie op
      if n >= save_every_x_iterations:
           n = 0
           schade_dataset.to_file("meting_met_uuids_buurschade.geojson", driver='GeoJSON')
