@@ -88,7 +88,13 @@ for index, item in schade_dataset.iterrows():
                if(item['uuid'] != item2['uuid'] ):
                
                     #matches[index].append(item2['uuid'])
-                    extra_info[index].append([schade_dataset_copy.loc[index_copy, 'wegnummer'], schade_dataset_copy.loc[index_copy,'strooksoor'], schade_dataset_copy.loc[index_copy, 'strookvolg'], schade_dataset_copy.loc[index_copy, 'hm_van'], schade_dataset_copy.loc[index_copy, 'hm_tot'],  schade_dataset_copy.loc[index_copy, 'maatgevende_schadeklasse'], item2['uuid']])
+                    extra_info[index].append([schade_dataset_copy.loc[index_copy, 'wegnummer'],
+                                              schade_dataset_copy.loc[index_copy,'strooksoor'],
+                                              schade_dataset_copy.loc[index_copy, 'strookvolg'],
+                                              schade_dataset_copy.loc[index_copy, 'hm_van'],
+                                              schade_dataset_copy.loc[index_copy, 'hm_tot'],
+                                              schade_dataset_copy.loc[index_copy, 'maatgevende_schadeklasse'],
+                                              item2['uuid']])
 
 
      #sla iedere x iteraties een versie op
