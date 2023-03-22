@@ -2,3 +2,5 @@
 *.xlsx
 *.docx
 *.qgz
+*.json
+*.pbix

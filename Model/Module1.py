@@ -72,35 +72,45 @@ schade_dataset_pandas['extra_info'] = None
 #make a list for all the matches with same length as the df
 #matches = [[] for _ in range(len(schade_dataset))]
 extra_info = [[] for _ in range(len(schade_dataset))]
-
+matches = [[] for _ in range(len(schade_dataset))]
 for index, item in schade_dataset.iterrows():
      
      pbar.update(1)
      #update n om iedere x iteraties op te slaan
      n += 1
-
+     n_matches = 0
+     geo1 = item['geometry']
      for index_copy, item2 in schade_dataset_copy.iterrows():
+          geo2 = item2['geometry']
           
-
-          #als wegvak aan een ander wegvak grenst met schade (inclusief diagonalen)
-          if(item['geometry'].touches(item2['geometry'])):
-               #moet niet zichzelf als buur toevoegen
-               if(item['uuid'] != item2['uuid'] ):
-               
-                    #matches[index].append(item2['uuid'])
-                    extra_info[index].append([schade_dataset_copy.loc[index_copy, 'wegnummer'],
-                                              schade_dataset_copy.loc[index_copy,'strooksoor'],
-                                              schade_dataset_copy.loc[index_copy, 'strookvolg'],
-                                              schade_dataset_copy.loc[index_copy, 'hm_van'],
-                                              schade_dataset_copy.loc[index_copy, 'hm_tot'],
-                                              schade_dataset_copy.loc[index_copy, 'maatgevende_schadeklasse'],
-                                              item2['uuid']])
-
+          #moet niet zichzelf als buur toevoegen
+          if(item['uuid'] != item2['uuid'] ):
+               try:
+                    #als wegvak aan een ander wegvak grenst met schade (inclusief diagonalen)
+                    if(geo1.touches(geo2)):
+                         intersect_info = geo1.intersection(geo2)
+                         if intersect_info.boundary:
+                              matches[index].append(item2['uuid'])
+                              extra_info[index].append([schade_dataset_copy.loc[index_copy, 'wegnummer'],
+                                                       schade_dataset_copy.loc[index_copy,'strooksoor'],
+                                                       schade_dataset_copy.loc[index_copy, 'strookvolg'],
+                                                       schade_dataset_copy.loc[index_copy, 'hm_van'],
+                                                       schade_dataset_copy.loc[index_copy, 'hm_tot'],
+                                                       schade_dataset_copy.loc[index_copy, 'maatgevende_schadeklasse'],
+                                                       item2['uuid']])
+                              n_matches += 1
+                              if n_matches == 4:
+                                   print('Matched all 4, breaking the for loop!')
+                                   break
+               except:
+                    print('')
+                    print('geometry probably not valid')
+                    print('uuid: ' + str(item2['uuid']))
 
      #sla iedere x iteraties een versie op
      if n >= save_every_x_iterations:
           #zet de lijst van matches in de kolom
-          #schade_dataset_pandas['matches'] = matches
+          schade_dataset_pandas['matches'] = matches
           schade_dataset_pandas['extra_info'] = extra_info
           #schade_dataset['matches'] = matches
           n = 0
